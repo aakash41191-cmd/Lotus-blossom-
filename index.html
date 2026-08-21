@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Programmer's Flowers ✨</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #131b21;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      cursor: pointer;
+      position: relative;
+    }
+
+    /* Ambient background fireflies */
+    canvas#fireflies {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .container {
+      position: relative;
+      width: 95vw;
+      max-width: 550px;
+      height: 60vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    /* Core Pulsing Golden Light */
+    .golden-core {
+      position: absolute;
+      bottom: 28%;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, rgba(255, 220, 150, 1) 0%, rgba(255, 120, 180, 0.7) 40%, rgba(255, 80, 150, 0.2) 65%, transparent 80%);
+      border-radius: 50%;
+      filter: blur(20px);
+      animation: corePulse 3.5s ease-in-out infinite alternate;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    svg#flower-frame {
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      filter: drop-shadow(0 0 18px rgba(255, 140, 210, 0.75)) drop-shadow(0 0 35px rgba(255, 180, 100, 0.45));
+    }
+
+    /* Stem */
+    .stem {
+      stroke: url(#stem-grad);
+      stroke-width: 8;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    /* Petal layers styling */
+    .petal {
+      fill: url(#crystal-petal-grad);
+      stroke: rgba(255, 235, 255, 0.85);
+      stroke-width: 1.2;
+      transform-origin: 300px 370px;
+      opacity: 0;
+    }
+
+    .inner-petal {
+      fill: url(#inner-petal-grad);
+      stroke: rgba(255, 255, 255, 0.95);
+      stroke-width: 1.4;
+      transform-origin: 300px 370px;
+      opacity: 0;
+    }
+
+    .stamen-line {
+      stroke: #fff4d0;
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0;
+    }
+
+    /* Trigger Blooming Animation Sequence */
+    .blooming .stem {
+      opacity: 0.9;
+    }
+
+    .blooming .layer-1 {
+      animation: bloomLayer 2.6s cubic-bezier(0.12, 0.9, 0.25, 1) 0.1s forwards;
+    }
+
+    .blooming .layer-2 {
+      animation: bloomLayer 2.4s cubic-bezier(0.12, 0.9, 0.25, 1) 0.5s forwards;
+    }
+
+    .blooming .layer-3 {
+      animation: bloomLayer 2.2s cubic-bezier(0.12, 0.9, 0.25, 1) 0.9s forwards;
+    }
+
+    .blooming .layer-4 {
+      animation: bloomLayer 2.0s cubic-bezier(0.12, 0.9, 0.25, 1) 1.3s forwards;
+    }
+
+    .blooming .stamen-line {
+      animation: stamenGlow 1.8s ease-out 1.8s forwards;
+    }
+
+    @keyframes bloomLayer {
+      0% {
+        opacity: 0;
+        transform: scale(0.1) rotate(0deg);
+      }
+      40% {
+        opacity: 0.8;
+      }
+      100% {
+        opacity: 0.92;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes stamenGlow {
+      0% { opacity: 0; transform: scaleY(0); }
+      100% { opacity: 0.9; transform: scaleY(1); }
+    }
+
+    @keyframes corePulse {
+      0% { transform: scale(0.85); opacity: 0.6; }
+      100% { transform: scale(1.25); opacity: 1; }
+    }
+
+    /* Message UI */
+    .message-box {
+      margin-top: 15px;
+      text-align: center;
+      z-index: 2;
+      min-height: 60px;
+    }
+
+    .quote-text {
+      color: #ffeef8;
+      font-size: 17px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 300;
+      text-shadow: 0 0 12px rgba(255, 150, 210, 0.8), 0 0 24px rgba(255, 200, 120, 0.5);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .quote-text.fade-out {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    .tap-hint {
+      margin-top: 6px;
+      color: rgba(255, 210, 235, 0.55);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="fireflies"></canvas>
+
+  <div class="container">
+    <div class="golden-core"></div>
+    
+    <svg id="flower-frame" viewBox="0 0 600 500">
+      <defs>
+        <!-- Translucent Crystal Glass Pink Gradient -->
+        <linearGradient id="crystal-petal-grad" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#ff3b88" stop-opacity="0.25"/>
+          <stop offset="40%" stop-color="#ffa0d2" stop-opacity="0.55"/>
+          <stop offset="85%" stop-color="#ffffff" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
+        </linearGradient>
+
+        <!-- Warm Center Core Gradient -->
+        <linearGradient id="inner-petal-grad" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#ff7b00" stop-opacity="0.4"/>
+          <stop offset="50%" stop-color="#ffd56b" stop-opacity="0.85"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
+        </linearGradient>
+
+        <!-- Golden Amber Stem Gradient -->
+        <linearGradient id="stem-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffe699"/>
+          <stop offset="50%" stop-color="#a66e2c"/>
+          <stop offset="100%" stop-color="#2a3f28"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Stem -->
+      <path class="stem" d="M 300 370 Q 300 440 295 490" />
+
+      <g id="lotusGroup" class="blooming">
+        <!-- Layer 1: Widest Horizontal Base Petals -->
+        <path class="petal layer-1" d="M 300 370 C 180 390 40 340 20 280 C 10 240 100 240 190 280 C 240 300 280 340 300 370 Z" />
+        <path class="petal layer-1" d="M 300 370 C 420 390 560 340 580 280 C 590 240 500 240 410 280 C 360 300 320 340 300 370 Z" />
+
+        <!-- Layer 2: Lower-Middle Spread Petals -->
+        <path class="petal layer-2" d="M 300 370 C 170 360 70 270 60 190 C 60 140 150 170 210 230 C 250 270 280 330 300 370 Z" />
+        <path class="petal layer-2" d="M 300 370 C 430 360 530 270 540 190 C 540 140 450 170 390 230 C 350 270 320 330 300 370 Z" />
+        <path class="petal layer-2" d="M 300 370 C 220 340 120 210 140 130 C 160 80 230 140 250 220 C 270 280 290 340 300 370 Z" />
+        <path class="petal layer-2" d="M 300 370 C 380 340 480 210 460 130 C 440 80 370 140 350 220 C 330 280 310 340 300 370 Z" />
+
+        <!-- Layer 3: Upright Upper Petals -->
+        <path class="petal layer-3" d="M 300 370 C 220 310 180 180 220 90 C 240 50 290 120 280 210 C 280 270 290 330 300 370 Z" />
+        <path class="petal layer-3" d="M 300 370 C 380 310 420 180 380 90 C 360 50 310 120 320 210 C 320 270 310 330 300 370 Z" />
+        <path class="petal layer-3" d="M 300 370 C 250 280 240 140 300 60 C 360 140 350 280 300 370 Z" />
+
+        <!-- Layer 4: Glowing Inner Core Petals -->
+        <path class="inner-petal layer-4" d="M 300 370 C 265 310 260 210 300 140 C 340 210 335 310 300 370 Z" />
+        <path class="inner-petal layer-4" d="M 300 370 C 250 330 235 250 270 180 C 290 230 295 310 300 370 Z" />
+        <path class="inner-petal layer-4" d="M 300 370 C 350 330 365 250 330 180 C 310 230 305 310 300 370 Z" />
+
+        <!-- Glowing Golden Stamen Rays -->
+        <g style="transform-origin: 300px 370px;">
+          <path class="stamen-line" d="M 300 360 L 300 240" />
+          <path class="stamen-line" d="M 300 360 L 270 255" />
+          <path class="stamen-line" d="M 300 360 L 330 255" />
+          <path class="stamen-line" d="M 300 360 L 245 280" />
+          <path class="stamen-line" d="M 300 360 L 355 280" />
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="message-box">
+    <div class="quote-text" id="quoteText">For Someone Special ✨</div>
+    <div class="tap-hint">Tap anywhere to bloom</div>
+  </div>
+
+  <script>
+    // 1. Ambient Golden Bokeh Fireflies
+    const canvas = document.getElementById('fireflies');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Firefly {
+      constructor() { this.init(); }
+      init() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2.5 + 0.5;
+        this.vx = (Math.random() - 0.5) * 0.35;
+        this.vy = -Math.random() * 0.45 - 0.15;
+        this.alpha = Math.random() * 0.7 + 0.2;
+        this.flicker = Math.random() * 0.02 + 0.005;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha += Math.sin(Date.now() * this.flicker) * 0.01;
+        if (this.y < 0 || this.x < 0 || this.x > canvas.width) {
+          this.init();
+          this.y = canvas.height + 10;
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 220, 180, ${Math.max(0.1, this.alpha)})`;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(255, 140, 200, 0.8)';
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 50; i++) particles.push(new Firefly());
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // 2. Interactive Tap: Reset Bloom & Cycle Quotes
+    const lotusGroup = document.getElementById('lotusGroup');
+    const quoteText = document.getElementById('quoteText');
+    const quotes = [
+      "Just thought of you ✨",
+      "Blooming just for you 🌸",
+      "Hope this made you smile :)",
+      "You make ordinary days bright 💖",
+      "Made something special for you 💫",
+      "Have the most wonderful day 🌷"
+    ];
+    let quoteIndex = 0;
+
+    document.body.addEventListener('click', () => {
+      // Re-trigger blooming animation
+      lotusGroup.classList.remove('blooming');
+      void lotusGroup.offsetWidth; // Reflow
+      lotusGroup.classList.add('blooming');
+
+      // Update text
+      quoteIndex = (quoteIndex + 1) % quotes.length;
+      quoteText.classList.add('fade-out');
+      setTimeout(() => {
+        quoteText.textContent = quotes[quoteIndex];
+        quoteText.classList.remove('fade-out');
+      }, 250);
+    });
+  </script>
+</body>
+</html>

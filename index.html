@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Programmer's Flowers ✨</title>
+  <title>Programmer's Flowers 🌹</title>
   <style>
     * {
       margin: 0;
@@ -21,13 +21,13 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       cursor: pointer;
       position: relative;
     }
 
     /* Ambient background fireflies */
-    canvas#fireflies {
+    canvas#particles {
       position: absolute;
       top: 0;
       left: 0;
@@ -40,99 +40,137 @@
     .container {
       position: relative;
       width: 95vw;
-      max-width: 550px;
-      height: 60vh;
+      max-width: 620px;
+      height: 62vh;
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 2;
     }
 
-    /* Core Pulsing Golden Light */
-    .golden-core {
+    /* Golden Core Light */
+    .glow-light {
       position: absolute;
-      bottom: 28%;
-      width: 160px;
-      height: 160px;
-      background: radial-gradient(circle, rgba(255, 220, 150, 1) 0%, rgba(255, 120, 180, 0.7) 40%, rgba(255, 80, 150, 0.2) 65%, transparent 80%);
+      bottom: 24%;
+      width: 170px;
+      height: 170px;
+      background: radial-gradient(circle, rgba(255, 235, 175, 1) 0%, rgba(255, 120, 185, 0.75) 38%, rgba(255, 60, 140, 0.2) 65%, transparent 78%);
       border-radius: 50%;
-      filter: blur(20px);
-      animation: corePulse 3.5s ease-in-out infinite alternate;
+      filter: blur(22px);
+      opacity: 0;
+      transform: scale(0.2);
       z-index: 1;
       pointer-events: none;
     }
 
+    .blooming .glow-light {
+      animation: coreRise 3.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards, pulseAmbient 4s ease-in-out 4.3s infinite alternate;
+    }
+
+    /* Main Flower SVG */
     svg#flower-frame {
       width: 100%;
       height: 100%;
       z-index: 2;
-      filter: drop-shadow(0 0 18px rgba(255, 140, 210, 0.75)) drop-shadow(0 0 35px rgba(255, 180, 100, 0.45));
+      filter: drop-shadow(0 0 20px rgba(255, 140, 210, 0.8)) drop-shadow(0 0 45px rgba(240, 190, 80, 0.45));
+    }
+
+    /* 1. Golden Frame & Vines */
+    .vine-stroke {
+      fill: none;
+      stroke: #fce196;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      opacity: 0.9;
+    }
+
+    .blooming .vine-stroke {
+      animation: drawVine 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* 2. Petals */
+    .petal-layer {
+      fill: url(#crystal-pink-grad);
+      stroke: rgba(255, 240, 255, 0.9);
+      stroke-width: 1;
+      transform-origin: 300px 380px;
+      opacity: 0;
+    }
+
+    .inner-petal-layer {
+      fill: url(#golden-pink-grad);
+      stroke: rgba(255, 255, 255, 0.95);
+      stroke-width: 1.2;
+      transform-origin: 300px 380px;
+      opacity: 0;
+    }
+
+    .blooming .p-back {
+      animation: petalBloom 2.6s cubic-bezier(0.12, 0.9, 0.25, 1) 1.2s forwards;
+    }
+
+    .blooming .p-mid {
+      animation: petalBloom 2.4s cubic-bezier(0.12, 0.9, 0.25, 1) 1.8s forwards;
+    }
+
+    .blooming .p-front {
+      animation: petalBloom 2.2s cubic-bezier(0.12, 0.9, 0.25, 1) 2.4s forwards;
+    }
+
+    .blooming .p-center {
+      animation: petalBloom 2.0s cubic-bezier(0.12, 0.9, 0.25, 1) 2.9s forwards;
+    }
+
+    /* 3. Golden Stamen & Sparkle Filigree */
+    .stamen {
+      stroke: #fff4d0;
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      opacity: 0;
+    }
+
+    .blooming .stamen {
+      animation: stamenRise 1.6s ease-out 3.2s forwards;
     }
 
     /* Stem */
     .stem {
       stroke: url(#stem-grad);
-      stroke-width: 8;
+      stroke-width: 7;
       stroke-linecap: round;
       fill: none;
       opacity: 0;
-      transition: opacity 1s ease;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
     }
 
-    /* Petal layers styling */
-    .petal {
-      fill: url(#crystal-petal-grad);
-      stroke: rgba(255, 235, 255, 0.85);
-      stroke-width: 1.2;
-      transform-origin: 300px 370px;
-      opacity: 0;
-    }
-
-    .inner-petal {
-      fill: url(#inner-petal-grad);
-      stroke: rgba(255, 255, 255, 0.95);
-      stroke-width: 1.4;
-      transform-origin: 300px 370px;
-      opacity: 0;
-    }
-
-    .stamen-line {
-      stroke: #fff4d0;
-      stroke-width: 1.2;
-      stroke-linecap: round;
-      fill: none;
-      opacity: 0;
-    }
-
-    /* Trigger Blooming Animation Sequence */
     .blooming .stem {
+      animation: drawVine 1.5s ease-out 0.2s forwards;
       opacity: 0.9;
     }
 
-    .blooming .layer-1 {
-      animation: bloomLayer 2.6s cubic-bezier(0.12, 0.9, 0.25, 1) 0.1s forwards;
+    /* Keyframes */
+    @keyframes drawVine {
+      to { stroke-dashoffset: 0; }
     }
 
-    .blooming .layer-2 {
-      animation: bloomLayer 2.4s cubic-bezier(0.12, 0.9, 0.25, 1) 0.5s forwards;
+    @keyframes coreRise {
+      0% { opacity: 0; transform: scale(0.2) translateY(30px); }
+      50% { opacity: 0.9; transform: scale(1.1) translateY(0); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    .blooming .layer-3 {
-      animation: bloomLayer 2.2s cubic-bezier(0.12, 0.9, 0.25, 1) 0.9s forwards;
+    @keyframes pulseAmbient {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      100% { transform: scale(1.25); opacity: 1; }
     }
 
-    .blooming .layer-4 {
-      animation: bloomLayer 2.0s cubic-bezier(0.12, 0.9, 0.25, 1) 1.3s forwards;
-    }
-
-    .blooming .stamen-line {
-      animation: stamenGlow 1.8s ease-out 1.8s forwards;
-    }
-
-    @keyframes bloomLayer {
+    @keyframes petalBloom {
       0% {
         opacity: 0;
-        transform: scale(0.1) rotate(0deg);
+        transform: scale(0.08) rotate(0deg);
       }
       40% {
         opacity: 0.8;
@@ -143,18 +181,13 @@
       }
     }
 
-    @keyframes stamenGlow {
+    @keyframes stamenRise {
       0% { opacity: 0; transform: scaleY(0); }
-      100% { opacity: 0.9; transform: scaleY(1); }
-    }
-
-    @keyframes corePulse {
-      0% { transform: scale(0.85); opacity: 0.6; }
-      100% { transform: scale(1.25); opacity: 1; }
+      100% { opacity: 1; transform: scaleY(1); }
     }
 
     /* Message UI */
-    .message-box {
+    .message-container {
       margin-top: 15px;
       text-align: center;
       z-index: 2;
@@ -163,11 +196,11 @@
 
     .quote-text {
       color: #ffeef8;
-      font-size: 17px;
+      font-size: 16px;
       letter-spacing: 3px;
       text-transform: uppercase;
       font-weight: 300;
-      text-shadow: 0 0 12px rgba(255, 150, 210, 0.8), 0 0 24px rgba(255, 200, 120, 0.5);
+      text-shadow: 0 0 12px rgba(255, 145, 210, 0.8), 0 0 25px rgba(255, 190, 100, 0.5);
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
@@ -178,7 +211,7 @@
 
     .tap-hint {
       margin-top: 6px;
-      color: rgba(255, 210, 235, 0.55);
+      color: rgba(255, 215, 235, 0.5);
       font-size: 11px;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -187,24 +220,24 @@
 </head>
 <body>
 
-  <canvas id="fireflies"></canvas>
+  <canvas id="particles"></canvas>
 
   <div class="container">
-    <div class="golden-core"></div>
-    
-    <svg id="flower-frame" viewBox="0 0 600 500">
+    <div class="glow-light"></div>
+
+    <svg id="flower-frame" viewBox="0 0 600 520">
       <defs>
         <!-- Translucent Crystal Glass Pink Gradient -->
-        <linearGradient id="crystal-petal-grad" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stop-color="#ff3b88" stop-opacity="0.25"/>
-          <stop offset="40%" stop-color="#ffa0d2" stop-opacity="0.55"/>
+        <linearGradient id="crystal-pink-grad" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#ff3380" stop-opacity="0.25"/>
+          <stop offset="45%" stop-color="#ffa3d5" stop-opacity="0.6"/>
           <stop offset="85%" stop-color="#ffffff" stop-opacity="0.9"/>
           <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
         </linearGradient>
 
         <!-- Warm Center Core Gradient -->
-        <linearGradient id="inner-petal-grad" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stop-color="#ff7b00" stop-opacity="0.4"/>
+        <linearGradient id="golden-pink-grad" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#ff6a00" stop-opacity="0.45"/>
           <stop offset="50%" stop-color="#ffd56b" stop-opacity="0.85"/>
           <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
         </linearGradient>
@@ -218,74 +251,80 @@
       </defs>
 
       <!-- Stem -->
-      <path class="stem" d="M 300 370 Q 300 440 295 490" />
+      <path class="stem" d="M 300 380 Q 300 450 295 500" />
 
-      <g id="lotusGroup" class="blooming">
-        <!-- Layer 1: Widest Horizontal Base Petals -->
-        <path class="petal layer-1" d="M 300 370 C 180 390 40 340 20 280 C 10 240 100 240 190 280 C 240 300 280 340 300 370 Z" />
-        <path class="petal layer-1" d="M 300 370 C 420 390 560 340 580 280 C 590 240 500 240 410 280 C 360 300 320 340 300 370 Z" />
+      <g id="flowerAnimGroup" class="blooming">
+        <!-- Surrounding Golden Vines & Frame (Draws First) -->
+        <path class="vine-stroke" d="M 300 380 C 170 385 40 330 20 260 C 5 210 110 180 190 230 C 240 260 280 320 300 380 Z" />
+        <path class="vine-stroke" d="M 300 380 C 430 385 560 330 580 260 C 595 210 490 180 410 230 C 360 260 320 320 300 380 Z" />
+        <path class="vine-stroke" d="M 300 400 C 130 380 30 240 70 140 C 120 40 210 60 210 110 C 210 60 300 40 350 140 C 390 240 290 380 300 400 Z" />
+        <path class="vine-stroke" d="M 300 380 C 210 320 160 170 210 80 C 240 30 300 90 300 160 C 300 90 360 30 390 80 C 440 170 390 320 300 380 Z" />
 
-        <!-- Layer 2: Lower-Middle Spread Petals -->
-        <path class="petal layer-2" d="M 300 370 C 170 360 70 270 60 190 C 60 140 150 170 210 230 C 250 270 280 330 300 370 Z" />
-        <path class="petal layer-2" d="M 300 370 C 430 360 530 270 540 190 C 540 140 450 170 390 230 C 350 270 320 330 300 370 Z" />
-        <path class="petal layer-2" d="M 300 370 C 220 340 120 210 140 130 C 160 80 230 140 250 220 C 270 280 290 340 300 370 Z" />
-        <path class="petal layer-2" d="M 300 370 C 380 340 480 210 460 130 C 440 80 370 140 350 220 C 330 280 310 340 300 370 Z" />
+        <!-- 1. Wide Horizontal Outermost Petals -->
+        <path class="petal-layer p-back" d="M 300 380 C 160 400 30 350 10 275 C 0 230 100 230 195 275 C 245 295 285 345 300 380 Z" />
+        <path class="petal-layer p-back" d="M 300 380 C 440 400 570 350 590 275 C 600 230 500 230 405 275 C 355 295 315 345 300 380 Z" />
 
-        <!-- Layer 3: Upright Upper Petals -->
-        <path class="petal layer-3" d="M 300 370 C 220 310 180 180 220 90 C 240 50 290 120 280 210 C 280 270 290 330 300 370 Z" />
-        <path class="petal layer-3" d="M 300 370 C 380 310 420 180 380 90 C 360 50 310 120 320 210 C 320 270 310 330 300 370 Z" />
-        <path class="petal layer-3" d="M 300 370 C 250 280 240 140 300 60 C 360 140 350 280 300 370 Z" />
+        <!-- 2. Mid-Lower Spread Petals -->
+        <path class="petal-layer p-mid" d="M 300 380 C 160 370 60 270 50 185 C 50 135 145 165 210 230 C 255 275 285 335 300 380 Z" />
+        <path class="petal-layer p-mid" d="M 300 380 C 440 370 540 270 550 185 C 550 135 455 165 390 230 C 345 275 315 335 300 380 Z" />
+        <path class="petal-layer p-mid" d="M 300 380 C 210 340 110 200 135 120 C 155 70 230 135 250 220 C 270 285 290 345 300 380 Z" />
+        <path class="petal-layer p-mid" d="M 300 380 C 390 340 490 200 465 120 C 445 70 370 135 350 220 C 330 285 310 345 300 380 Z" />
 
-        <!-- Layer 4: Glowing Inner Core Petals -->
-        <path class="inner-petal layer-4" d="M 300 370 C 265 310 260 210 300 140 C 340 210 335 310 300 370 Z" />
-        <path class="inner-petal layer-4" d="M 300 370 C 250 330 235 250 270 180 C 290 230 295 310 300 370 Z" />
-        <path class="inner-petal layer-4" d="M 300 370 C 350 330 365 250 330 180 C 310 230 305 310 300 370 Z" />
+        <!-- 3. Upright Lotus Petals -->
+        <path class="petal-layer p-front" d="M 300 380 C 215 315 175 180 215 85 C 235 45 290 120 280 215 C 280 280 290 340 300 380 Z" />
+        <path class="petal-layer p-front" d="M 300 380 C 385 315 425 180 385 85 C 365 45 310 120 320 215 C 320 280 310 340 300 380 Z" />
+        <path class="petal-layer p-front" d="M 300 380 C 240 285 230 140 300 55 C 370 140 360 285 300 380 Z" />
 
-        <!-- Glowing Golden Stamen Rays -->
-        <g style="transform-origin: 300px 370px;">
-          <path class="stamen-line" d="M 300 360 L 300 240" />
-          <path class="stamen-line" d="M 300 360 L 270 255" />
-          <path class="stamen-line" d="M 300 360 L 330 255" />
-          <path class="stamen-line" d="M 300 360 L 245 280" />
-          <path class="stamen-line" d="M 300 360 L 355 280" />
+        <!-- 4. Glowing Crystal Center Core -->
+        <path class="inner-petal-layer p-center" d="M 300 380 C 260 315 255 210 300 135 C 345 210 340 315 300 380 Z" />
+        <path class="inner-petal-layer p-center" d="M 300 380 C 245 335 230 250 268 175 C 288 230 295 315 300 380 Z" />
+        <path class="inner-petal-layer p-center" d="M 300 380 C 355 335 370 250 332 175 C 312 230 305 315 300 380 Z" />
+
+        <!-- Golden Stamen Lines -->
+        <g style="transform-origin: 300px 380px;">
+          <path class="stamen" d="M 300 370 L 300 230" />
+          <path class="stamen" d="M 300 370 L 265 245" />
+          <path class="stamen" d="M 300 370 L 335 245" />
+          <path class="stamen" d="M 300 370 L 235 275" />
+          <path class="stamen" d="M 300 370 L 365 275" />
         </g>
       </g>
     </svg>
   </div>
 
-  <div class="message-box">
-    <div class="quote-text" id="quoteText">For Someone Special ✨</div>
+  <div class="message-container">
+    <div class="quote-text" id="quoteText">Programmer's flowers 🌹</div>
     <div class="tap-hint">Tap anywhere to bloom</div>
   </div>
 
   <script>
     // 1. Ambient Golden Bokeh Fireflies
-    const canvas = document.getElementById('fireflies');
+    const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
     let particles = [];
 
-    function resize() {
+    function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resize);
-    resize();
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
     class Firefly {
       constructor() { this.init(); }
       init() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2.5 + 0.5;
+        this.size = Math.random() * 2.5 + 0.6;
         this.vx = (Math.random() - 0.5) * 0.35;
-        this.vy = -Math.random() * 0.45 - 0.15;
+        this.vy = -Math.random() * 0.4 - 0.15;
         this.alpha = Math.random() * 0.7 + 0.2;
         this.flicker = Math.random() * 0.02 + 0.005;
       }
       update() {
         this.x += this.vx;
         this.y += this.vy;
-        this.alpha += Math.sin(Date.now() * this.flicker) * 0.01;
+        this.alpha += Math.sin(Date.now() * this.flicker) * 0.015;
         if (this.y < 0 || this.x < 0 || this.x > canvas.width) {
           this.init();
           this.y = canvas.height + 10;
@@ -296,27 +335,27 @@
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 220, 180, ${Math.max(0.1, this.alpha)})`;
         ctx.shadowBlur = 10;
-        ctx.shadowColor = 'rgba(255, 140, 200, 0.8)';
+        ctx.shadowColor = 'rgba(255, 140, 200, 0.85)';
         ctx.fill();
       }
     }
 
     for (let i = 0; i < 50; i++) particles.push(new Firefly());
 
-    function animate() {
+    function renderParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach(p => { p.update(); p.draw(); });
-      requestAnimationFrame(animate);
+      requestAnimationFrame(renderParticles);
     }
-    animate();
+    renderParticles();
 
     // 2. Interactive Tap: Reset Bloom & Cycle Quotes
-    const lotusGroup = document.getElementById('lotusGroup');
+    const flowerGroup = document.getElementById('flowerAnimGroup');
     const quoteText = document.getElementById('quoteText');
     const quotes = [
-      "Just thought of you ✨",
+      "I hope he buys you flowers 🌹",
+      "I hope he holds your hand ✨",
       "Blooming just for you 🌸",
-      "Hope this made you smile :)",
       "You make ordinary days bright 💖",
       "Made something special for you 💫",
       "Have the most wonderful day 🌷"
@@ -325,9 +364,9 @@
 
     document.body.addEventListener('click', () => {
       // Re-trigger blooming animation
-      lotusGroup.classList.remove('blooming');
-      void lotusGroup.offsetWidth; // Reflow
-      lotusGroup.classList.add('blooming');
+      flowerGroup.classList.remove('blooming');
+      void flowerGroup.offsetWidth; // Reflow
+      flowerGroup.classList.add('blooming');
 
       // Update text
       quoteIndex = (quoteIndex + 1) % quotes.length;
